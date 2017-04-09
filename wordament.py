@@ -1,6 +1,6 @@
 import pygame
 import random
-white = (255,255,255)
+
 class Tile:
 
     def __init__(self, x, y, image, cover):
@@ -38,7 +38,7 @@ class Tile:
 
 pygame.init()
 
-screen = pygame.display.set_mode((320,320))
+screen = pygame.display.set_mode((195,195))
 
 # create images
 
@@ -53,8 +53,8 @@ cov.fill((0,255,0))
 # create tiles-
 
 tiles = []
-for y in range(3,11):
-    for x in range(3,11):
+for y in range(8):
+    for x in range(8):
         tiles.append( Tile(x*25, y*25, img, cov) )
 
 # mainloop
