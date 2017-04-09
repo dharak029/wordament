@@ -1,7 +1,7 @@
 import pygame
 import random
 
-# color = (  R    G    B)
+# color constants
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 DARKTURQOISE = (3, 54, 73)
@@ -9,10 +9,17 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
+# time constants
+TOTAL_TIME = 3
+FRAME_RATE = 60
+FRAME_COUNT = 0
+
+# other constants
+TIMER_X = 100
+TIMER_Y = 65
 
 class Tile:
     def __init__(self, x, y, screen):
-        BASICFONT = pygame.font.Font('freesansbold.ttf', 12)
         self.value = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
         self.textInactive = BASICFONT.render(self.value, True, BLACK)
         self.textActive = BASICFONT.render(self.value, True, WHITE)
@@ -59,7 +66,7 @@ def main():
     screen.fill(DARKTURQOISE)
     pygame.draw.rect(screen, WHITE, [100, 100, 285, 285])
     tiles = createTiles(screen)
-    startGame(tiles)
+    startGame(screen, tiles)
     pygame.quit()
 
 
@@ -80,36 +87,60 @@ def getTile(tiles, event):
         if tile.rect.collidepoint(event.pos):
             return tile
 
+def runClock(screen, clock):
+    global FRAME_COUNT
+    basicfont = pygame.font.Font('freesansbold.ttf', 30)
+    total_seconds = TOTAL_TIME - (FRAME_COUNT // FRAME_RATE)
 
+    if total_seconds < 0:
+        total_seconds = 0
+        return False
 
-def startGame(tiles):
+    minutes = total_seconds // 60
+    seconds = total_seconds % 60
+
+    timer = "{0:02}:{1:02}".format(minutes, seconds)
+
+    timeLabel = basicfont.render(timer, True, WHITE)
+    rect = pygame.Rect(TIMER_X, TIMER_Y, timeLabel.get_width()+5, timeLabel.get_height())
+    # del. CAUTION! Update the constants in header
+    surf = pygame.surface.Surface(rect.size)
+
+    surf.fill(DARKTURQOISE)
+    screen.blit(surf, rect)
+    screen.blit(timeLabel, (TIMER_X, TIMER_Y))
+
+    FRAME_COUNT += 1
+
+    clock.tick(FRAME_RATE)
+
+def startGame(screen, tiles):
     clock = pygame.time.Clock()
     found_words=[]
     word=""
+
     while True:
-        # events
+        pygame.display.flip()
+
+        runningClock = runClock(screen, clock)
+        if runningClock is not None and not runningClock:
+            # del. for now it closes the window, code to be written
+            # del. current total time is set to 3 sec for debug purpouse check TOTAL_TIME on line 13
+            return
+
+        # events thread
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 tile = getTile(tiles, event)
-                tile.updateState(event)
-                word = word+""+tile.value
-                print(word) # check console when you execute this
-
-        # updates
-
-        for tile in tiles:
-            pass#tile.update(screen)
+                if tile: # check if it is a valid tile
+                    tile.updateState(event)
+                    word = word+""+tile.value
+                    print(word) # del. check console when you execute this
 
 
 
-        pygame.display.flip()
-
-        # clock
-
-        clock.tick(25)
-
-
+# calling main()
 if __name__ == '__main__':
     main()
