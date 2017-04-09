@@ -1,130 +1,156 @@
 import pygame
 import random
 
-white = (255, 255, 255)
-darkturqoise = (3, 54, 73)
-black = (0, 0, 0)
+# color constants
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+DARKTURQOISE = (3, 54, 73)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+
+# time constants
+TOTAL_TIME = 3
+FRAME_RATE = 60
+FRAME_COUNT = 0
+
+# other constants
+TIMER_X = 100
+TIMER_Y = 65
 
 
 class Tile:
-    def __init__(self, x, y, image, cover):
-        self.image = image
-        self.cover = cover
+    def __init__(self, x, y, screen):
+        self.value = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        self.textInactive = BASICFONT.render(self.value, True, BLACK)
+        self.textActive = BASICFONT.render(self.value, True, WHITE)
         self.rect = pygame.Rect(x, y, 30, 30)
-        self.covered = True
+        self.coords = (x + 10, y + 10)
+        self.surf = pygame.surface.Surface((30, 30))
+        self.active = False
         self.time_to_cover = None
+        self.screen = screen
 
-    def draw(self, screen):
-        # draw cover or image
-        if self.covered:
-            screen.blit(self.cover, self.rect)
+    def draw(self):
+        self.surf.fill(GREEN)
+        self.screen.blit(self.surf, self.rect)
+        self.screen.blit(self.textInactive, self.coords)
+
+    def update(self, active):
+        if active:
+            self.surf.fill(RED)
+            self.screen.blit(self.surf, self.rect)
+            self.screen.blit(self.textActive, self.coords)
         else:
-            screen.blit(self.image, self.rect)
+            self.surf.fill(GREEN)
+            self.screen.blit(self.surf, self.rect)
+            self.screen.blit(self.textInactive, self.coords)
 
-    def update(self):
-        # hide card (after 2000ms)
-        if not self.covered and pygame.time.get_ticks() >= self.time_to_cover:
-            self.covered = True
-
-    def handle_event(self, event):
+    def updateState(self, event):
         # check left button click
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             # check position
-            '''if self.rect.collidepoint(event.pos):
-                self.covered = not self.covered
-                if not self.covered:
-                    # if uncovered then set +2000ms to cover
-                    #self.time_to_cover = pygame.time.get_ticks() + 2000'''
+            if self.rect.collidepoint(event.pos):
+                self.active = not self.active
+                self.update(self.active)
+        return self.active, self.value
 
 
 # ----------------------------------------------------------------------
 
-# init
-
-pygame.init()
-
-screen = pygame.display.set_mode((550, 550))
-screen.fill(darkturqoise)
-
-
-total_time = 120
-frame_rate = 60
-frame_count = 0
-
-basicfont = pygame.font.Font('freesansbold.ttf', 30)
-
-# create images
-
-# char = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-
-img = pygame.surface.Surface((30, 30))
-img.fill((255, 0, 0))
-
-cov = pygame.surface.Surface((30, 30))
-cov.fill((0, 255, 0))
-
-# create tiles-
-
-tiles = []
-for y in range(3, 11):
-    for x in range(3, 11):
-        tiles.append(Tile(x * 35, y * 35, img, cov))
-
-# mainloop
-
-clock = pygame.time.Clock()
-
-running = True
-
-while running:
-
-    # events
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
-
-        for x in tiles:
-            x.handle_event(event)
+def main():
+    global BASICFONT
+    pygame.init()
+    pygame.display.set_caption('Wordament')
+    screen = pygame.display.set_mode((500, 500))
+    BASICFONT = pygame.font.Font('freesansbold.ttf', 12)
+    screen.fill(DARKTURQOISE)
+    pygame.draw.rect(screen, WHITE, [100, 100, 285, 285])
+    tiles = createTiles(screen)
+    startGame(screen, tiles)
+    pygame.quit()
 
 
-    # Timer
+def createTiles(screen):
+    # create
+    tiles = []
+    for y in range(3, 11):
+        for x in range(3, 11):
+            tiles.append(Tile(x * 35, y * 35, screen))
 
-    total_seconds = total_time - (frame_count // frame_rate)
+    # draws
+    for x in tiles:
+        x.draw()
+    return tiles
+
+
+def getTile(tiles, event):
+    for tile in tiles:
+        if tile.rect.collidepoint(event.pos):
+            return tile
+
+
+def runClock(screen, clock):
+    global FRAME_COUNT
+    basicfont = pygame.font.Font('freesansbold.ttf', 30)
+    total_seconds = TOTAL_TIME - (FRAME_COUNT // FRAME_RATE)
 
     if total_seconds < 0:
         total_seconds = 0
+        return False
 
     minutes = total_seconds // 60
-
     seconds = total_seconds % 60
 
     timer = "{0:02}:{1:02}".format(minutes, seconds)
 
-    text = basicfont.render(timer, True, black)
+    timeLabel = basicfont.render(timer, True, WHITE)
+    rect = pygame.Rect(TIMER_X, TIMER_Y, timeLabel.get_width() + 5, timeLabel.get_height())
+    # del. CAUTION! Update the constants in header
+    surf = pygame.surface.Surface(rect.size)
 
-    screen.fill(darkturqoise)
-    screen.blit(text, [100, 65])
+    surf.fill(DARKTURQOISE)
+    screen.blit(surf, rect)
+    screen.blit(timeLabel, (TIMER_X, TIMER_Y))
 
-    frame_count += 1
+    FRAME_COUNT += 1
 
-    clock.tick(frame_rate)
+    clock.tick(FRAME_RATE)
 
-    pygame.draw.rect(screen, white, [100, 100, 285, 285])
 
-    # updates
+def startGame(screen, tiles):
+    clock = pygame.time.Clock()
+    found_words = []
+    word = ""
 
-    for x in tiles:
-        x.update()
+    while True:
+        pygame.display.flip()
 
-    # draws
+        runningClock = runClock(screen, clock)
+        if runningClock is not None and not runningClock:
+            # del. for now it closes the window, code to be written
+            # del. current total time is set to 3 sec for debug purpouse check TOTAL_TIME on line 13
+            return
 
-    for x in tiles:
-        x.draw(screen)
+        # events thread
+        for event in pygame.event.get():
 
-    pygame.display.flip()
+            # exit events
+            if event.type == pygame.QUIT:
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return
 
-pygame.quit()
+            # game events
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                tile = getTile(tiles, event)
+                if tile:  # check if it is a valid tile
+                    tile.updateState(event)
+                    word = word + "" + tile.value
+                    print(word)  # del. check console when you execute this
+
+
+# calling main()
+if __name__ == '__main__':
+    main()
