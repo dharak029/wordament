@@ -3,7 +3,8 @@ import random
 
 white = (255, 255, 255)
 darkturqoise = (3, 54, 73)
-black = (0,0,0)
+black = (0, 0, 0)
+
 
 class Tile:
     def __init__(self, x, y, image, cover):
@@ -44,7 +45,7 @@ pygame.init()
 
 screen = pygame.display.set_mode((550, 550))
 screen.fill(darkturqoise)
-pygame.draw.rect(screen, white, [100, 100, 285, 285])
+
 
 total_time = 120
 frame_rate = 60
@@ -72,6 +73,7 @@ for y in range(3, 11):
 # mainloop
 
 clock = pygame.time.Clock()
+
 running = True
 
 while running:
@@ -88,7 +90,8 @@ while running:
         for x in tiles:
             x.handle_event(event)
 
-     # Timer
+
+    # Timer
 
     total_seconds = total_time - (frame_count // frame_rate)
 
@@ -104,11 +107,13 @@ while running:
     text = basicfont.render(timer, True, black)
 
     screen.fill(darkturqoise)
-    screen.blit(text, [100, 75])
+    screen.blit(text, [100, 65])
 
     frame_count += 1
 
     clock.tick(frame_rate)
+
+    pygame.draw.rect(screen, white, [100, 100, 285, 285])
 
     # updates
 
@@ -119,7 +124,6 @@ while running:
 
     for x in tiles:
         x.draw(screen)
-
 
     pygame.display.flip()
 
