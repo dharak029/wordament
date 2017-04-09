@@ -1,43 +1,49 @@
 import pygame
 import random
 
+# color         = (  R    G    B
+WHITE           = (255, 255, 255)
+BLACK           = (  0,   0,   0)
+DARKTURQOISE    = (  3,  54,  73)
+RED             = (255,   0,   0)
+GREEN           = (  0, 255,   0)
+BLUE            = (  0,   0, 255)
 
-white = (255,255,255)
-darkturqoise = ( 3,  54,  73)
+
 
 class Tile:
 
-    def __init__(self, x, y, image, cover):
-        self.image = image
-        self.cover = cover
-        self.rect = pygame.Rect(x, y, 30, 30)
-        self.covered = True
-        self.time_to_cover = None
-
-    def draw(self, screen):
-        # draw cover or image
-        BLACK = (0, 0, 0)
+    def __init__(self, x, y, screen):
         BASICFONT = pygame.font.Font('freesansbold.ttf', 12)
-        if self.covered:
-            textSurf = BASICFONT.render(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), True, BLACK)
-            screen.blit(textSurf, self.rect)
-        else:
-            screen.blit(self.image, self.rect)
+        self.value = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        self.textInactive = BASICFONT.render(self.value, True, BLACK)
+        self.textActive = BASICFONT.render(self.value, True, WHITE)
+        self.rect = pygame.Rect(x, y, 30, 30)
+        self.coords = (x + 10, y + 10)
+        self.surf = pygame.surface.Surface((30, 30))
+        self.clicked = False
+        self.time_to_cover = None
+        self.screen = screen
+
+    def draw(self):
+        self.surf.fill(GREEN)
+        self.screen.blit(self.surf, self.rect)
+        self.screen.blit(self.textInactive, self.coords)
+
 
     def update(self):
-        # hide card (after 2000ms)
-        if not self.covered and pygame.time.get_ticks() >= self.time_to_cover:
-            self.covered = True
+        self.surf.fill(RED)
+        self.screen.blit(self.surf, self.rect)
+        screen.blit(self.textActive, self.coords)
 
     def handle_event(self, event):
         # check left button click
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             # check position
             if self.rect.collidepoint(event.pos):
-                self.covered = not self.covered
-                if not self.covered:
-                    # if uncovered then set +2000ms to cover
-                    self.time_to_cover = pygame.time.get_ticks() + 2000
+                print(event.pos)
+                self.clicked = True
+                self.update()
 
 #----------------------------------------------------------------------
 
@@ -45,31 +51,21 @@ class Tile:
 
 pygame.init()
 
-screen = pygame.display.set_mode((550,550))
-screen.fill(darkturqoise)
-pygame.draw.rect(screen, white, [100,100,285,285])
+screen = pygame.display.set_mode((500, 500))
+screen.fill(DARKTURQOISE)
+pygame.draw.rect(screen, BLUE, [100, 100, 285, 285])
 
-# create images
 
-#char = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-
-img = pygame.surface.Surface((30, 30))
-img.fill((255,0,0))
-
-cov = pygame.surface.Surface((30, 30))
-cov.fill((0,255,0))
-
-# create tiles-
+# create tiles
 
 tiles = []
-for y in range(3,11):
-    for x in range(3,11):
-        tiles.append( Tile(x*35, y*35, img, cov) )
+for y in range(3, 11):
+    for x in range(3, 11):
+        tiles.append(Tile(x*35, y*35, screen))
 
 # draws
-
 for x in tiles:
-    x.draw(screen)
+   x.draw()
 
 # mainloop
 
@@ -79,7 +75,6 @@ running = True
 while running:
 
     # events
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -90,7 +85,7 @@ while running:
     # updates
 
     for x in tiles:
-        x.update()
+        pass#x.update(screen)
 
 
 
