@@ -17,7 +17,7 @@ def makeGrid(words, size=[10,10], attempts=10):
         except RuntimeError as e:
             pass
     else:
-        print "ERROR - Couldn't create valid board"
+        print ("ERROR - Couldn't create valid board")
         raise e
 
 def attemptGrid(words, size):
@@ -32,7 +32,7 @@ def attemptGrid(words, size):
     sizeCap = (size[0] if size[0] >= size[1] else size[1])
     sizeCap -= 1
     if any(len(word) > sizeCap for word in words):
-        print "ERROR: Too small a grid for supplied words."
+        print ("ERROR: Too small a grid for supplied words.")
         return
 
     grid = [[' ' for _ in range(size[0])] for __ in range(size[1])]

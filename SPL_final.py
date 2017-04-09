@@ -1,6 +1,5 @@
 import pygame
 
-
 white = (255,255,255)
 darkturqoise = ( 3,  54,  73)
 
