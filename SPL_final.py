@@ -120,9 +120,6 @@ while running:
     for x in tiles:
         x.draw(screen)
 
-        # clock
-
-
 
     pygame.display.flip()
 
