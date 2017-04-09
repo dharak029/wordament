@@ -130,9 +130,16 @@ def startGame(screen, tiles):
 
         # events thread
         for event in pygame.event.get():
+
+            # exit events
             if event.type == pygame.QUIT:
                 return
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return
+
+            # game events
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 tile = getTile(tiles, event)
                 if tile: # check if it is a valid tile
                     tile.updateState(event)
