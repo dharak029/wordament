@@ -73,6 +73,7 @@ for y in range(3, 11):
 # mainloop
 
 clock = pygame.time.Clock()
+
 running = True
 
 while running:
