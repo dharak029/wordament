@@ -75,6 +75,12 @@ def createTiles(screen):
         x.draw()
     return tiles
 
+def getTile(tiles, event):
+    for tile in tiles:
+        if tile.rect.collidepoint(event.pos):
+            return tile
+
+
 
 def startGame(tiles):
     clock = pygame.time.Clock()
@@ -86,8 +92,10 @@ def startGame(tiles):
             if event.type == pygame.QUIT:
                 return
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                for tile in tiles:
-                    active, value = tile.updateState(event)
+                tile = getTile(tiles, event)
+                tile.updateState(event)
+                word = word+""+tile.value
+                print(word) # check console when you execute this
 
         # updates
 
