@@ -1,12 +1,12 @@
 import pygame
 import random
-
+white = (255,255,255)
 class Tile:
 
     def __init__(self, x, y, image, cover):
         self.image = image
         self.cover = cover
-        self.rect = pygame.Rect(x, y, 60, 60)
+        self.rect = pygame.Rect(x, y, 20, 20)
         self.covered = True
         self.time_to_cover = None
 
@@ -44,18 +44,18 @@ screen = pygame.display.set_mode((320,320))
 
 char = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
 
-img = pygame.surface.Surface((60, 60))
+img = pygame.surface.Surface((20, 20))
 img.fill((255,0,0))
 
-cov = pygame.surface.Surface((60, 60))
+cov = pygame.surface.Surface((20, 20))
 cov.fill((0,255,0))
 
 # create tiles-
 
 tiles = []
-for y in range(5):
-    for x in range(5):
-        tiles.append( Tile(x*65, y*65, img, cov) )
+for y in range(3,11):
+    for x in range(3,11):
+        tiles.append( Tile(x*25, y*25, img, cov) )
 
 # mainloop
 
