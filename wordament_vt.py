@@ -1,18 +1,16 @@
 import pygame
 import random
 
-# color         = (  R    G    B
-WHITE           = (255, 255, 255)
-BLACK           = (  0,   0,   0)
-DARKTURQOISE    = (  3,  54,  73)
-RED             = (255,   0,   0)
-GREEN           = (  0, 255,   0)
-BLUE            = (  0,   0, 255)
-
+# color = (  R    G    B)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+DARKTURQOISE = (3, 54, 73)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 
 
 class Tile:
-
     def __init__(self, x, y, screen):
         BASICFONT = pygame.font.Font('freesansbold.ttf', 12)
         self.value = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -21,7 +19,7 @@ class Tile:
         self.rect = pygame.Rect(x, y, 30, 30)
         self.coords = (x + 10, y + 10)
         self.surf = pygame.surface.Surface((30, 30))
-        self.clicked = False
+        self.active = False
         self.time_to_cover = None
         self.screen = screen
 
@@ -30,69 +28,80 @@ class Tile:
         self.screen.blit(self.surf, self.rect)
         self.screen.blit(self.textInactive, self.coords)
 
+    def update(self, active):
+        if active:
+            self.surf.fill(RED)
+            self.screen.blit(self.surf, self.rect)
+            self.screen.blit(self.textActive, self.coords)
+        else:
+            self.surf.fill(GREEN)
+            self.screen.blit(self.surf, self.rect)
+            self.screen.blit(self.textInactive, self.coords)
 
-    def update(self):
-        self.surf.fill(RED)
-        self.screen.blit(self.surf, self.rect)
-        screen.blit(self.textActive, self.coords)
-
-    def handle_event(self, event):
+    def updateState(self, event):
         # check left button click
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             # check position
             if self.rect.collidepoint(event.pos):
-                print(event.pos)
-                self.clicked = True
-                self.update()
-
-#----------------------------------------------------------------------
-
-# init
-
-pygame.init()
-
-screen = pygame.display.set_mode((500, 500))
-screen.fill(DARKTURQOISE)
-pygame.draw.rect(screen, BLUE, [100, 100, 285, 285])
+                self.active = not self.active
+                self.update(self.active)
+        return self.active, self.value
 
 
-# create tiles
+# ----------------------------------------------------------------------
 
-tiles = []
-for y in range(3, 11):
-    for x in range(3, 11):
-        tiles.append(Tile(x*35, y*35, screen))
+def main():
+    global BASICFONT
+    pygame.init()
+    pygame.display.set_caption('Wordament')
+    screen = pygame.display.set_mode((500, 500))
+    BASICFONT = pygame.font.Font('freesansbold.ttf', 12)
+    screen.fill(DARKTURQOISE)
+    pygame.draw.rect(screen, WHITE, [100, 100, 285, 285])
+    tiles = createTiles(screen)
+    startGame(tiles)
+    pygame.quit()
 
-# draws
-for x in tiles:
-   x.draw()
 
-# mainloop
+def createTiles(screen):
+    # create
+    tiles = []
+    for y in range(3, 11):
+        for x in range(3, 11):
+            tiles.append(Tile(x * 35, y * 35, screen))
 
-clock = pygame.time.Clock()
-running = True
-
-while running:
-
-    # events
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-        for x in tiles:
-            x.handle_event(event)
-
-    # updates
-
+    # draws
     for x in tiles:
-        pass#x.update(screen)
+        x.draw()
+    return tiles
+
+
+def startGame(tiles):
+    clock = pygame.time.Clock()
+    found_words=[]
+    word=""
+    while True:
+        # events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                for tile in tiles:
+                    active, value = tile.updateState(event)
+
+        # updates
+
+        for tile in tiles:
+            pass#tile.update(screen)
 
 
 
-    pygame.display.flip()
+        pygame.display.flip()
 
-    # clock
+        # clock
 
-    clock.tick(25)
+        clock.tick(25)
 
-pygame.quit()
+
+if __name__ == '__main__':
+    main()
