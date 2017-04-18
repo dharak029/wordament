@@ -1,6 +1,10 @@
 import pygame
 import random
-from PyDictionary import PyDictionary
+from random import randint
+import itertools
+from copy import deepcopy
+words = ["python", "itertools", "wordsearch","code","review","functions",
+         "dimensional", "dictionary", "lacklustre"]
 
 # color constants
 WHITE = (255, 255, 255)
@@ -24,6 +28,7 @@ Reset_X = 100
 Reset_Y = 400
 Score_X = 275
 Score_Y = 65
+
 
 class Tile:
     def __init__(self, x, y, screen):
@@ -195,13 +200,21 @@ def startGame(screen, tiles):
                     word = word+""+tile.value
                     print(word) # del. check console when you execute this
                 if reset.collidepoint(event.pos):
-                    main()
+                    screen = pygame.display.set_mode((500, 500))
+                    screen.fill(DARKTURQOISE)
+                    pygame.draw.rect(screen, WHITE, [100, 100, 285, 285])
+                    tiles = createTiles(screen)
+                    scoreLabel(screen, str(score))
+                    submit = submitButton(screen)
+                    reset = resetButton(screen)
                 if submit.collidepoint(event.pos):
                     if(word=='DOG'):
                         score = score+1
                         scoreLabel(screen, str(score))
+                    word = ""
 
 
 # calling main()
 if __name__ == '__main__':
     main()
+
