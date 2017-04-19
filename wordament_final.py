@@ -30,6 +30,7 @@ Score_X = 275
 Score_Y = 65
 
 
+
 class Tile:
     def __init__(self, x, y, screen):
         self.value = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')

@@ -15,10 +15,11 @@ def makeGrid(words, size=[10,10], attempts=10):
         try:
             return attemptGrid(words, size)
         except RuntimeError as e:
+
             pass
     else:
         print ("ERROR - Couldn't create valid board")
-        raise e
+        raise
 
 def attemptGrid(words, size):
     '''Attempt a grid of letters to be a wordsearch
@@ -117,7 +118,11 @@ def printGrid(grid):
         print ("| " + " | ".join(line) + " |")
         print ("+" + ('---+' * width))
 
+
+# starts below
+
 words = ["python", "itertools", "wordsearch","code","review","functions",
          "dimensional", "dictionary", "lacklustre"]
 grid, answers = makeGrid(words, [14,8])
+print(answers)
 printGrid(grid)
