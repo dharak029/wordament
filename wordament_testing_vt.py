@@ -5,7 +5,10 @@ import itertools
 from copy import deepcopy
 
 words = ["python", "itertools", "wordsearch", "code", "review", "functions",
-         "dimensional", "dictionary", "lacklustre"]
+         "dimensional", "dictionary", "vaijyant"]
+
+letters = "qwertyuiopasdfghjklzxcvbnm"
+
 
 # color constants
 WHITE = (255, 255, 255)
@@ -30,15 +33,124 @@ Reset_Y = 400
 Score_X = 275
 Score_Y = 65
 
-ROW_SIZE = 8
-COL_SIZE = 8
+ROW_SIZE = 10
+COL_SIZE = 10
 
 grid = [[j for j in range(ROW_SIZE)] for i in range(COL_SIZE)]
 
 
+
+def makeGrid(words, size=[10, 10], attempts=10):
+    '''Run attemptGrid trying attempts number of times.
+
+    Size contains the height and width of the board.
+    Word is a list of words it should contain.'''
+
+    for _ in range(attempts):
+        try:
+            return attemptGrid(words, size)
+        except RuntimeError as e:
+
+            pass
+    else:
+        print ("ERROR - Couldn't create valid board")
+        raise
+
+def attemptGrid(words, size):
+    '''Attempt a grid of letters to be a wordsearch
+
+    Size contains the height and width of the board.
+    Word is a list of words it should contain.
+    Returns the 2D list grid and a dictionary of the words as keys and
+    lists of their co-ordinates as values.'''
+
+    #Make sure that the board is bigger than even the biggest word
+    sizeCap = (size[0] if size[0] >= size[1] else size[1])
+    sizeCap -= 1
+    if any(len(word) > sizeCap for word in words):
+        print ("ERROR: Too small a grid for supplied words.")
+        return
+
+    grid = [[' ' for _ in range(size[0])] for __ in range(size[1])]
+
+    #Insert answers and store their locations
+    answers = {}
+    for word in words:
+        grid, answer = insertWord(word,grid)
+        answers[word] = answer
+
+    #Add other characters to fill the empty space
+    for i,j in itertools.product(range(size[1]),range(size[0])):
+        if grid[i][j] == ' ':
+            grid[i][j] = letters[randint(0,len(letters)-1)]
+
+    return grid, answers
+
+def insertWord(word, grid, invalid=None):
+    '''Insert a word into the letter grid
+
+    'word' will be inserted into the 2D list grid.
+    invalid is either None or a list of coordinates
+    These coordinates are denote starting points that don't work.
+    Returns an updated grid as well as a list of the added word's indices.'''
+
+    height, width = len(grid), len(grid[0])
+    length = len(word)
+
+    #Detect whether the word can fit horizontally or vertically.
+    hori = width >= length + 1
+    vert = height >= length + 1
+    if hori and vert:
+        #If both can be true, flip a coin to decide which it will be
+        hori = bool(randint(0,1))
+        vert = not hori
+
+    line = [] #For storing the letters' locations
+    if invalid is None:
+        invalid = [[None,None,True],[None,None,False]]
+
+    #Height * width is an approximation of how many attempts we need
+    for _ in range(height*width):
+        if hori:
+            x = randint(0,width-1-length)
+            y = randint(0,height-1)
+        else:
+            x = randint(0,width-1)
+            y = randint(0,height-1-length)
+        if [y,x,hori] not in invalid:
+            break
+    else:
+        # Probably painted into a corner, raise an error to retry.
+        raise(RuntimeError)
+
+    start = [y, x, hori] #Saved in case of invalid placement
+    #Now attempt to insert each letter
+    for letter in word:
+        if grid[y][x] in (' ', letter):
+            line.append([y,x])
+            if hori:
+                x += 1
+            else:
+                y += 1
+        else:
+            #We found a place the word can't fit
+            #Mark the starting point as invalid
+            invalid.append(start)
+            return insertWord(word, grid, invalid)
+
+    #Since it's a valid place, write to the grid and return
+    for i,cell in enumerate(line):
+        grid[cell[0]][cell[1]] = word[i]
+    return grid, line
+
+# ===copied code ends===================================================================================================
+
+
+
+
 class Tile:
     def __init__(self, x, y, screen):
-        self.char = None
+        self.char = ' '
         self.rect = pygame.Rect(x, y, 30, 30)
         self.coords = (x + 10, y + 10)
         self.surf = pygame.surface.Surface((30, 30))
@@ -68,7 +180,7 @@ class Tile:
             if self.rect.collidepoint(event.pos):
                 self.active = not self.active
                 self.update(self.active)
-        return self.active, self.value
+        return self.active, self.char
 
     def set_char(self, char):
         self.char = char
@@ -89,8 +201,8 @@ def main():
     BASICFONT = pygame.font.Font('freesansbold.ttf', 12)
     screen.fill(DARKTURQOISE)
     pygame.draw.rect(screen, WHITE, [100, 100, 285, 285])
-    tiles = createTiles(screen)
-    startGame(screen, tiles)
+    grid = createTiles(screen)
+    startGame(screen, grid)
     pygame.quit()
 
 
@@ -131,9 +243,6 @@ def scoreLabel(screen, score):
     screen.blit(scorelabel, (Score_X, Score_Y))
 
 
-char = 65
-
-
 def createTiles(screen):
     global char
 
@@ -143,24 +252,26 @@ def createTiles(screen):
             row_pix = (row + 3) * 35
             col_pix = (col + 3) * 35
             grid[row][col] = Tile(col_pix, row_pix, screen)
-            grid[row][col].set_char(chr(char))  # line for testing
-            char += 1  # line for testing
 
     # set character values function here use the grid[][] List
 
+    # set characters
+    display_grid, answers = makeGrid(words)
+
 
     # draws
-    for row_tiles in grid:
-        for tile in row_tiles:
-            print("hi!")
+    for of_row in display_grid:
+        for tile in of_row:
             tile.draw()
-    return
+
+    return display_grid
 
 
-def getTile(tiles, event):
-    for tile in tiles:
-        if tile.rect.collidepoint(event.pos):
-            return tile
+def getTile(grid, event):
+    for row in grid:
+        for tile in row:
+            if tile.rect.collidepoint(event.pos):
+                return tile
 
 
 def runClock(screen, clock):
@@ -191,7 +302,7 @@ def runClock(screen, clock):
     clock.tick(FRAME_RATE)
 
 
-def startGame(screen, tiles):
+def startGame(screen, grid):
     score = 0
     submit = submitButton(screen)
     reset = resetButton(screen)
@@ -221,7 +332,7 @@ def startGame(screen, tiles):
 
             # game events
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                tile = getTile(tiles, event)
+                tile = getTile(grid, event)
                 if tile:  # check if it is a valid tile
                     tile.updateState(event)
                     word = word + "" + tile.char
@@ -230,12 +341,12 @@ def startGame(screen, tiles):
                     screen = pygame.display.set_mode((500, 500))
                     screen.fill(DARKTURQOISE)
                     pygame.draw.rect(screen, WHITE, [100, 100, 285, 285])
-                    tiles = createTiles(screen)
+                    grid = createTiles(screen)
                     scoreLabel(screen, str(score))
                     submit = submitButton(screen)
                     reset = resetButton(screen)
                 if submit.collidepoint(event.pos):
-                    if (word == 'DOG'):
+                    if (word == 'BIQ'):
                         score = score + 1
                         scoreLabel(screen, str(score))
                     word = ""
