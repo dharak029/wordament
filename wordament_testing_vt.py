@@ -4,8 +4,8 @@ from random import randint
 import itertools
 from copy import deepcopy
 
-words = ["python", "itertools", "wordsearch", "code", "review", "functions",
-         "dimensional", "dictionary", "vaijyant"]
+words = ["python", "iter", "word", "code", "review", "funion",
+         "light", "cat", "camel"]
 
 letters = "qwertyuiopasdfghjklzxcvbnm"
 
@@ -33,14 +33,14 @@ Reset_Y = 400
 Score_X = 275
 Score_Y = 65
 
-ROW_SIZE = 10
-COL_SIZE = 10
+ROW_SIZE = 8
+COL_SIZE = 8
 
 grid = [[j for j in range(ROW_SIZE)] for i in range(COL_SIZE)]
 
 
 
-def makeGrid(words, size=[10, 10], attempts=10):
+def makeGrid(words, grid, size=[8, 8], attempts=10):
     '''Run attemptGrid trying attempts number of times.
 
     Size contains the height and width of the board.
@@ -48,7 +48,7 @@ def makeGrid(words, size=[10, 10], attempts=10):
 
     for _ in range(attempts):
         try:
-            return attemptGrid(words, size)
+            return attemptGrid(words, grid, size)
         except RuntimeError as e:
 
             pass
@@ -56,7 +56,7 @@ def makeGrid(words, size=[10, 10], attempts=10):
         print ("ERROR - Couldn't create valid board")
         raise
 
-def attemptGrid(words, size):
+def attemptGrid(words, grid, size):
     '''Attempt a grid of letters to be a wordsearch
 
     Size contains the height and width of the board.
@@ -71,7 +71,6 @@ def attemptGrid(words, size):
         print ("ERROR: Too small a grid for supplied words.")
         return
 
-    grid = [[' ' for _ in range(size[0])] for __ in range(size[1])]
 
     #Insert answers and store their locations
     answers = {}
@@ -126,7 +125,7 @@ def insertWord(word, grid, invalid=None):
     start = [y, x, hori] #Saved in case of invalid placement
     #Now attempt to insert each letter
     for letter in word:
-        if grid[y][x] in (' ', letter):
+        if grid[y][x].get_char() in (' ', letter):
             line.append([y,x])
             if hori:
                 x += 1
@@ -140,7 +139,7 @@ def insertWord(word, grid, invalid=None):
 
     #Since it's a valid place, write to the grid and return
     for i,cell in enumerate(line):
-        grid[cell[0]][cell[1]] = word[i]
+        grid[cell[0]][cell[1]].set_char(word[i])
     return grid, line
 
 # ===copied code ends===================================================================================================
@@ -151,6 +150,8 @@ def insertWord(word, grid, invalid=None):
 class Tile:
     def __init__(self, x, y, screen):
         self.char = ' '
+        self.textInactive = BASICFONT.render(self.char, True, BLACK)
+        self.textActive = BASICFONT.render(self.char, True, WHITE)
         self.rect = pygame.Rect(x, y, 30, 30)
         self.coords = (x + 10, y + 10)
         self.surf = pygame.surface.Surface((30, 30))
@@ -256,7 +257,7 @@ def createTiles(screen):
     # set character values function here use the grid[][] List
 
     # set characters
-    display_grid, answers = makeGrid(words)
+    display_grid, answers = makeGrid(words, grid)
 
 
     # draws
