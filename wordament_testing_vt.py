@@ -4,8 +4,8 @@ from random import randint
 import itertools
 from copy import deepcopy
 
-words = ["python", "iter", "word", "code", "review", "funion",
-         "light", "cat", "camel"]
+words = ["python", "jack", "word", "code", "review", "funion",
+         "light", "cat", "camel", "dog"]
 
 letters = "qwertyuiopasdfghjklzxcvbnm"
 
@@ -42,7 +42,6 @@ grid = [[j for j in range(ROW_SIZE)] for i in range(COL_SIZE)]
 
 def makeGrid(words, grid, size=[8, 8], attempts=10):
     '''Run attemptGrid trying attempts number of times.
-
     Size contains the height and width of the board.
     Word is a list of words it should contain.'''
 
@@ -58,7 +57,6 @@ def makeGrid(words, grid, size=[8, 8], attempts=10):
 
 def attemptGrid(words, grid, size):
     '''Attempt a grid of letters to be a wordsearch
-
     Size contains the height and width of the board.
     Word is a list of words it should contain.
     Returns the 2D list grid and a dictionary of the words as keys and
@@ -80,14 +78,13 @@ def attemptGrid(words, grid, size):
 
     #Add other characters to fill the empty space
     for i,j in itertools.product(range(size[1]),range(size[0])):
-        if grid[i][j] == ' ':
-            grid[i][j] = letters[randint(0,len(letters)-1)]
+        if grid[i][j].char == ' ':
+            grid[i][j].set_char(letters[randint(0,len(letters)-1)])
 
     return grid, answers
 
 def insertWord(word, grid, invalid=None):
     '''Insert a word into the letter grid
-
     'word' will be inserted into the 2D list grid.
     invalid is either None or a list of coordinates
     These coordinates are denote starting points that don't work.
@@ -190,7 +187,6 @@ class Tile:
 
     def get_char(self):
         return self.char
-
 
 # ----------------------------------------------------------------------
 
@@ -304,6 +300,7 @@ def runClock(screen, clock):
 
 
 def startGame(screen, grid):
+    global FRAME_COUNT
     score = 0
     submit = submitButton(screen)
     reset = resetButton(screen)
@@ -343,13 +340,19 @@ def startGame(screen, grid):
                     screen.fill(DARKTURQOISE)
                     pygame.draw.rect(screen, WHITE, [100, 100, 285, 285])
                     grid = createTiles(screen)
+                    score=0
                     scoreLabel(screen, str(score))
                     submit = submitButton(screen)
                     reset = resetButton(screen)
+                    clock = pygame.time.Clock()
+                    FRAME_COUNT = 0
+                    runClock(screen, clock)
                 if submit.collidepoint(event.pos):
-                    if (word == 'BIQ'):
-                        score = score + 1
-                        scoreLabel(screen, str(score))
+                    for x in words:
+                        if (word == x and word not in found_words):
+                            score = score + 1
+                            scoreLabel(screen, str(score))
+                            found_words.append(word)
                     word = ""
 
 
