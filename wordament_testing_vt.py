@@ -272,13 +272,12 @@ def getTile(grid, event):
                 return tile
 
 
-def checkAlignment(lastTiles, currentTile):
+def checkAlignment(lastTiles, currTile):
     horizontal = None
-    tile1 = lastTiles[0]
-    tile2 = currentTile
-    if tile1.row == tile2.row:
+    prevTile = lastTiles[0]
+    if prevTile.row == currTile.row and prevTile.col+1 == currTile.col:
         horizontal = True
-    if tile1.col == tile2.col:
+    if prevTile.col == currTile.col and prevTile.row+1 == currTile.row:
         horizontal = False
 
     return horizontal
