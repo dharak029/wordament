@@ -155,6 +155,8 @@ class Tile:
         self.active = False
         self.time_to_cover = None
         self.screen = screen
+        self.row = y/35 - 3
+        self.col = x/35 - 3
 
     def draw(self):
         self.surf.fill(GREEN)
@@ -241,7 +243,6 @@ def scoreLabel(screen, score):
 
 
 def createTiles(screen):
-    global char
 
     # create
     for row in range(ROW_SIZE):
@@ -269,6 +270,21 @@ def getTile(grid, event):
         for tile in row:
             if tile.rect.collidepoint(event.pos):
                 return tile
+
+
+def checkAlignment(lastTiles, currentTile):
+    horizontal = None
+    tile1 = lastTiles[0]
+    tile2 = currentTile
+    if tile1.row == tile2.row:
+        horizontal = True
+    if tile1.col == tile2.col:
+        horizontal = False
+
+    return horizontal
+
+def validTile(lastTile, currentTile, horizontal):
+    pass
 
 
 def runClock(screen, clock):
@@ -308,7 +324,8 @@ def startGame(screen, grid):
     clock = pygame.time.Clock()
     found_words = []
     word = ""
-
+    prevTiles = []
+    horizontal = None
     while True:
         pygame.display.flip()
 
@@ -331,16 +348,38 @@ def startGame(screen, grid):
             # game events
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 tile = getTile(grid, event)
-                if tile:  # check if it is a valid tile
-                    tile.updateState(event)
-                    word = word + "" + tile.char
+                if tile:  # check if the component clicked is a tile
+                    if len(prevTiles) == 0:
+                        tile.updateState(event)
+                        prevTiles.append(tile)
+                        word = word + "" + tile.char
+                    elif len(prevTiles) == 1:
+                        horizontal = checkAlignment(prevTiles, tile)
+                        if horizontal is not None:
+                            tile.updateState(event)
+                            prevTiles.append(tile)
+                            word = word + "" + tile.char
+                    else: # length > 2
+                        if horizontal:
+                            lastTile = prevTiles[-1]
+                            if lastTile.row == tile.row and lastTile.col < tile.col:
+                                tile.updateState(event)
+                                prevTiles.append(tile)
+                                word = word + "" + tile.char
+                        if not horizontal:
+                            lastTile = prevTiles[-1]
+                            if lastTile.col == tile.col and lastTile.row < tile.row:
+                                tile.updateState(event)
+                                prevTiles.append(tile)
+                                word = word + "" + tile.char
+
                     print(word)  # del. check console when you execute this
                 if reset.collidepoint(event.pos):
                     screen = pygame.display.set_mode((500, 500))
                     screen.fill(DARKTURQOISE)
                     pygame.draw.rect(screen, WHITE, [100, 100, 285, 285])
                     grid = createTiles(screen)
-                    score=0
+                    score = 0
                     scoreLabel(screen, str(score))
                     submit = submitButton(screen)
                     reset = resetButton(screen)
