@@ -362,13 +362,13 @@ def startGame(screen, grid):
                     else: # length > 2
                         if horizontal:
                             lastTile = prevTiles[-1]
-                            if lastTile.row == tile.row and lastTile.col < tile.col:
+                            if lastTile.row == tile.row and lastTile.col+1 == tile.col:
                                 tile.updateState(event)
                                 prevTiles.append(tile)
                                 word = word + "" + tile.char
                         if not horizontal:
                             lastTile = prevTiles[-1]
-                            if lastTile.col == tile.col and lastTile.row < tile.row:
+                            if lastTile.col == tile.col and lastTile.row+1 == tile.row:
                                 tile.updateState(event)
                                 prevTiles.append(tile)
                                 word = word + "" + tile.char
