@@ -17,6 +17,7 @@ DARKTURQOISE = (3, 54, 73)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+GRAY = (185, 185, 185)
 
 # time constants
 TOTAL_TIME = 120
@@ -77,9 +78,9 @@ def attemptGrid(words, grid, size):
         answers[word] = answer
 
     #Add other characters to fill the empty space
-    for i,j in itertools.product(range(size[1]),range(size[0])):
+    for i,j in itertools.product(range(size[1]), range(size[0])):
         if grid[i][j].char == ' ':
-            grid[i][j].set_char(letters[randint(0,len(letters)-1)])
+            grid[i][j].set_char(letters[randint(0, len(letters)-1)])
 
     return grid, answers
 
@@ -197,12 +198,56 @@ def main():
     pygame.init()
     pygame.display.set_caption('Wordament')
     screen = pygame.display.set_mode((500, 500))
+    showTitleScreen(screen, "WORDAMENT")
     BASICFONT = pygame.font.Font('freesansbold.ttf', 12)
     screen.fill(DARKTURQOISE)
     pygame.draw.rect(screen, WHITE, [100, 100, 285, 285])
     grid = createTiles(screen)
-    startGame(screen, grid)
+    quitEvent = startGame(screen, grid)
+    if quitEvent == pygame.QUIT:
+        return
+    if quitEvent == pygame.K_ESCAPE:
+        showTitleScreen(screen, "GAME OVER")
     pygame.quit()
+
+def showTitleScreen(screen, text):
+    keyPressMessageFont = pygame.font.SysFont("Britannic Bold", 24)
+
+    end_it = False
+    while end_it == False:
+        screen.fill(BLACK)
+        if text == "WORDAMENT":
+            font = pygame.font.SysFont("Britannic Bold", 48)
+            shadowFont = pygame.font.SysFont("Britannic Bold", 48)
+            title = font.render(text, 1, WHITE)
+            shadow = shadowFont.render(text, 1, GRAY)
+
+            keyPressMessage = keyPressMessageFont.render("Press any [ key ] to continue...", 1, WHITE)
+
+            screen.blit(shadow, (132, 102))
+            screen.blit(title, (130, 100))
+            screen.blit(keyPressMessage, (135, 300))
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    end_it = True
+        if text == "GAME OVER":
+            font = pygame.font.SysFont("Britannic Bold", 48)
+            shadowFont = pygame.font.SysFont("Britannic Bold", 48)
+            title = font.render(text, 1, WHITE)
+            shadow = shadowFont.render(text, 1, GRAY)
+
+            keyPressMessage = keyPressMessageFont.render("Press any [ key ] to end.", 1, WHITE)
+
+            screen.blit(shadow, (152, 102))
+            screen.blit(title, (150, 100))
+            screen.blit(keyPressMessage, (155, 300))
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYUP or event.type == pygame.QUIT:
+                    end_it = True
+
+    return
 
 
 # creating buttons
@@ -282,10 +327,6 @@ def checkAlignment(lastTiles, currTile):
 
     return horizontal
 
-def validTile(lastTile, currentTile, horizontal):
-    pass
-
-
 def runClock(screen, clock):
     global FRAME_COUNT
     basicfont = pygame.font.Font('freesansbold.ttf', 30)
@@ -316,11 +357,11 @@ def runClock(screen, clock):
 
 def startGame(screen, grid):
     global FRAME_COUNT
+    clock = pygame.time.Clock()
     score = 0
     submit = submitButton(screen)
     reset = resetButton(screen)
     scoreLabel(screen, '0')
-    clock = pygame.time.Clock()
     found_words = []
     word = ""
     prevTiles = []
@@ -332,17 +373,17 @@ def startGame(screen, grid):
         if runningClock is not None and not runningClock:
             # del. for now it closes the window, code to be written
             # del. current total time is set to 3 sec for debug purpouse check TOTAL_TIME on line 13
-            return
+            return pygame.K_ESCAPE
 
         # events thread
         for event in pygame.event.get():
 
             # exit events
             if event.type == pygame.QUIT:
-                return
-            if event.type == pygame.KEYDOWN:
+                return pygame.QUIT
+            if event.type == pygame.KEYUP:
                 if event.key == pygame.K_ESCAPE:
-                    return
+                    return pygame.K_ESCAPE
 
             # game events
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -358,7 +399,7 @@ def startGame(screen, grid):
                             tile.updateState(event)
                             prevTiles.append(tile)
                             word = word + "" + tile.char
-                    else: # length > 2
+                    else:  # length > 2
                         if horizontal:
                             lastTile = prevTiles[-1]
                             if lastTile.row == tile.row and lastTile.col+1 == tile.col:
@@ -391,7 +432,9 @@ def startGame(screen, grid):
                             score = score + 1
                             scoreLabel(screen, str(score))
                             found_words.append(word)
+
                     word = ""
+                    prevTiles = []
 
 
 # calling main()
