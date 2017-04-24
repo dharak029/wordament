@@ -434,7 +434,10 @@ def startGame(screen, grid):
                             found_words.append(word)
 
                     word = ""
+                    for tile in prevTiles:
+                        tile.updateState(event)
                     prevTiles = []
+
 
 
 # calling main()
