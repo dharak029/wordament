@@ -202,7 +202,6 @@ def showTitleScreen(screen, text):
             title = font.render(text, 1, WHITE)
             shadow = shadowFont.render(text, 1, GRAY)
 
-
             keyPressMessage = keyPressMessageFont.render("Press any [ key ] to continue...", 1, WHITE)
 
             screen.blit(shadow, (132, 102))
@@ -210,8 +209,10 @@ def showTitleScreen(screen, text):
             screen.blit(keyPressMessage, (135, 300))
             pygame.display.flip()
             for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.type == pygame.MOUSEBUTTONUP:
                     end_it = True
+                if event.type == pygame.QUIT:
+                    exit()
         if text == "GAME OVER":
             font = pygame.font.SysFont("Britannic Bold", 48)
             shadowFont = pygame.font.SysFont("Britannic Bold", 48)
