@@ -209,7 +209,6 @@ def showTitleScreen(screen, text):
             screen.blit(keyPressMessage, (135, 300))
             pygame.display.flip()
             for event in pygame.event.get():
-                print(event)
                 if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP:
                     end_it = True
                 if event.type == pygame.QUIT:
