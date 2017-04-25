@@ -175,9 +175,9 @@ class Tile:
 def main():
     global BASICFONT
     pygame.init()
-    pygame.display.set_caption('Wordament')
+    pygame.display.set_caption('Word Search')
     screen = pygame.display.set_mode((500, 500))
-    showTitleScreen(screen, "WORDAMENT")
+    showTitleScreen(screen, "Word Search")
     BASICFONT = pygame.font.Font('freesansbold.ttf', 12)
     screen.fill(DARKTURQOISE)
     pygame.draw.rect(screen, WHITE, [100, 100, 285, 285])
@@ -196,7 +196,7 @@ def showTitleScreen(screen, text):
     end_it = False
     while end_it == False:
         screen.fill(BLACK)
-        if text == "WORDAMENT":
+        if text == "Word Search":
             font = pygame.font.SysFont("Britannic Bold", 48)
             shadowFont = pygame.font.SysFont("Britannic Bold", 48)
             title = font.render(text, 1, WHITE)
